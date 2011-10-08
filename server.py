@@ -32,10 +32,9 @@ class UserHandler(tornado.web.RequestHandler):
         user = User.get(id)
         friend = self.get_argument("friend","")
 
-        # set friend
+        # set friend if not aready friend and not myself
         if friend != "" and id != friend :
             if not friend in [str(n._id) for n in user.gremlin("v.out('friend')")] :
-                print friend
                 Relationship.create(User.get(id),"friend",User.get(friend))
                 Relationship.create(User.get(friend),"friend",User.get(id))
 
@@ -49,10 +48,8 @@ class UserHandler(tornado.web.RequestHandler):
             )
 
         # load template
-        self.write(tornado.template.Loader("./").load("user.html").generate(
-            myself=user,
-            friends=f,
-            ffriends=ff,))
+        tpl = tornado.template.Loader("./").load("user.html")
+        self.write(tpl.generate( myself=user, friends=f, ffriends=ff ))
 
 
 class UsersHandler(tornado.web.RequestHandler):
@@ -61,7 +58,8 @@ class UsersHandler(tornado.web.RequestHandler):
         users = User.get_all()
 
         # load template
-        self.write(tornado.template.Loader("./").load("users.html").generate(users=users))
+        tpl = tornado.template.Loader("./").load("users.html")
+        self.write(tpl.generate( users=users ))
 
 
 """
